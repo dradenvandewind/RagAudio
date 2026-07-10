@@ -3,7 +3,12 @@ from pydantic import BaseModel, HttpUrl
 
 
 class IngestRequest(BaseModel):
-    url: HttpUrl
+    #url: HttpUrl
+    url: HttpUrl = Field(
+        ...,
+        description="URL de la vidéo à ingérer",
+        examples=["https://www.dailymotion.com/player/metadata/video/x123abc"],
+    )
     language: str = "fr"
     whisper_model: str = "small"  # tiny, base, small, medium, large-v3
 
