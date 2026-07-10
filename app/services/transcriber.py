@@ -1,19 +1,19 @@
-"""Transcription Whisper et génération de sous-titres SRT."""
+"""Whisper transcription and SRT subtitle generation."""
 from typing import Optional
 import whisper
 
-# Cache simple pour éviter de recharger un modèle à chaque requête
+# Simple cache to avoid reloading a model on each request
 _MODEL_CACHE: dict[str, "whisper.Whisper"] = {}
 
 
 def _get_model(model_name: str, device: Optional[str] = None):
     """
-    Charge (ou réutilise) un modèle Whisper.
+    Load (or reuse) a Whisper model.
 
-    Exemples :
-        _get_model("small")                      -> CPU/GPU auto
-        _get_model("large-v3", device="cuda")     -> forcé sur GPU
-        _get_model("medium", device="cpu")        -> forcé sur CPU
+    Examples:
+        _get_model("small")                      -> auto CPU/GPU
+        _get_model("large-v3", device="cuda")     -> forced on GPU
+        _get_model("medium", device="cpu")        -> forced on CPU
     """
     key = f"{model_name}:{device}"
     if key not in _MODEL_CACHE:
@@ -25,7 +25,7 @@ def _get_model(model_name: str, device: Optional[str] = None):
 
 
 def format_timestamp(seconds: float) -> str:
-    """Convertit des secondes en format SRT HH:MM:SS,mmm"""
+    """Convert seconds to SRT format HH:MM:SS,mmm"""
     hours = int(seconds // 3600)
     minutes = int((seconds % 3600) // 60)
     secs = int(seconds % 60)
@@ -41,9 +41,9 @@ def transcribe_to_srt(
     device: Optional[str] = None,
 ) -> dict:
     """
-    Transcrit un fichier audio et écrit un fichier .srt.
+    Transcribe an audio file and write a .srt file.
 
-    :return: le résultat brut de Whisper (dict avec "text" et "segments")
+    :return: raw Whisper result (dict with "text" and "segments")
     """
     model = _get_model(model_name, device)
     result = model.transcribe(audio_path, language=language)
