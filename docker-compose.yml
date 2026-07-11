@@ -83,7 +83,7 @@ services:
   # ──────────────────────────────────────────────
   rag-api:
     build: .
-    container_name: audio-rag-api
+    container_name: rag-llamaindex
 
     ports:
       - "${PORT:-8000}:8000"
