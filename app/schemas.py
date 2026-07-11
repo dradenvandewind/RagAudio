@@ -6,7 +6,7 @@ class IngestRequest(BaseModel):
     url: HttpUrl = Field(
         ...,
         description="URL de la vidéo à ingérer",
-        examples=["https://www.dailymotion.com/player/metadata/video/x123abc"],
+        examples=["https://www.dailymotion.com/player/video/xaof1fe"],
     )
     language: str = "fr"
     whisper_model: str = "small"  # tiny, base, small, medium, large-v3
