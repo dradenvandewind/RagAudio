@@ -41,3 +41,7 @@ app.include_router(ask.router)
 @app.get("/")
 def root():
     return {"message": "Audio RAG API — voir /docs pour la documentation interactive"}
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
