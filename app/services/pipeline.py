@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from app.core.config import settings
 from app.models.job import JobStatus
@@ -9,7 +10,7 @@ from app.services.rag_engine import RAGEngine
 logger = logging.getLogger("audio_rag.pipeline")
 
 
-def process_video(
+async def process_video(
     job_id: str,
     url: str,
     language: str,
@@ -19,23 +20,33 @@ def process_video(
 ) -> None:
     """Complete pipeline executed as a background task."""
     try:
-        job_store.update(job_id, status=JobStatus.DOWNLOADING)
-        audio_path = download_audio(url, str(settings.audio_dir / job_id))
+        await job_store.update(job_id, status=JobStatus.DOWNLOADING)
+        audio_path = await download_audio(url, str(settings.audio_dir / job_id))
 
-        job_store.update(job_id, status=JobStatus.TRANSCRIBING)
+        await job_store.update(job_id, status=JobStatus.TRANSCRIBING)
         srt_path = str(settings.srt_dir / f"{job_id}.srt")
-        result = transcribe_to_srt(
-            audio_path, srt_path, language=language, model_name=whisper_model,device="cpu"
+        # transcribe_to_srt is CPU-bound (Whisper) and synchronous: run it in a
+        # worker thread so it doesn't block the event loop while it runs.
+        result = await asyncio.to_thread(
+            transcribe_to_srt,
+            audio_path,
+            srt_path,
+            language=language,
+            model_name=whisper_model,
+            device="cpu",
         )
 
-        job_store.update(job_id, status=JobStatus.INDEXING)
-        rag.add_document(
+        await job_store.update(job_id, status=JobStatus.INDEXING)
+        # rag.add_document is likely also blocking (embedding calls, disk I/O);
+        # offload it too so it doesn't stall other requests.
+        await asyncio.to_thread(
+            rag.add_document,
             doc_id=job_id,
             text=result["text"],
             metadata={"source_url": url, "srt_path": srt_path},
         )
 
-        job_store.update(
+        await job_store.update(
             job_id,
             status=JobStatus.DONE,
             srt_path=srt_path,
@@ -45,4 +56,4 @@ def process_video(
 
     except Exception as e:
         logger.exception("Job %s failed", job_id)
-        job_store.set_error(job_id, str(e))
+        await job_store.set_error(job_id, str(e))

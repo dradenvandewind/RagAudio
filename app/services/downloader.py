@@ -5,11 +5,11 @@ yt-dlp drives ffmpeg internally for conversion (--audio-format mp3),
 so ffmpeg must be installed and available in the system PATH
 (e.g. `apt install ffmpeg` / `brew install ffmpeg`).
 """
-import subprocess
+import asyncio
 from pathlib import Path
 
 
-def download_audio(url: str, output_basename: str) -> str:
+async def download_audio(url: str, output_basename: str) -> str:
     """
     Download the audio track of a video (Dailymotion, YouTube, etc.)
     and convert it to mp3.
@@ -31,9 +31,17 @@ def download_audio(url: str, output_basename: str) -> str:
         url,
     ]
 
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    if result.returncode != 0:
-        raise RuntimeError(f"yt-dlp failed while downloading {url}:\n{result.stderr}")
+    process = await asyncio.create_subprocess_exec(
+        *cmd,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+    stdout, stderr = await process.communicate()
+
+    if process.returncode != 0:
+        raise RuntimeError(
+            f"yt-dlp failed while downloading {url}:\n{stderr.decode(errors='replace')}"
+        )
 
     mp3_path = f"{output_basename}.mp3"
     if not Path(mp3_path).exists():

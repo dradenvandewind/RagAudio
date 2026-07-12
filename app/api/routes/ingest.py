@@ -10,7 +10,7 @@ router = APIRouter(tags=["ingest"])
 
 
 @router.post("/ingest", response_model=IngestResponse)
-def ingest(
+async def ingest(
     req: IngestRequest,
     background_tasks: BackgroundTasks,
     job_store: JobStore = Depends(get_job_store),
@@ -18,7 +18,7 @@ def ingest(
 ):
     """Démarre le pipeline complet pour une URL Dailymotion (asynchrone)."""
     job_id = str(uuid.uuid4())
-    job_store.create(job_id, url=str(req.url))
+    await job_store.create(job_id, url=str(req.url))
 
     background_tasks.add_task(
         process_video,

@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     base_dir: Path = Path("data")
-    default_whisper_model: str = "small"
+    default_whisper_model: str = "medium"
     default_language: str = "fr"
 
     @property
