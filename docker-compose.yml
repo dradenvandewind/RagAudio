@@ -1,4 +1,13 @@
 services:
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    networks:
+      - rag-audio
+    volumes:
+      - redis-data:/data
+
   # ──────────────────────────────────────────────
   # Ollama
   # ──────────────────────────────────────────────
@@ -91,6 +100,7 @@ services:
       - "${PORT:-8000}:8000"
 
     environment:
+      REDIS_URL: redis://redis:6379/0
       OLLAMA_BASE_URL: http://ollama:11434
       OLLAMA_LLM_MODEL: llama3.2:1b-ctx2k
       OLLAMA_EMBED_MODEL: nomic-embed-text
@@ -114,6 +124,8 @@ services:
         condition: service_healthy
       ollama-init:
         condition: service_completed_successfully
+      redis:
+        condition: service_started
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
