@@ -8,7 +8,9 @@ services:
     restart: unless-stopped
 
     environment:
-      OLLAMA_NUM_CTX: 2048
+      OLLAMA_NUM_CTX: 
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
 
     ports:
       - "11434:11434"
@@ -27,13 +29,13 @@ services:
       start_period: 15s
 
     # Uncomment for NVIDIA GPU support
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: all
-    #           capabilities: [gpu]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
 
   # ──────────────────────────────────────────────
   # Pull models once
@@ -92,6 +94,16 @@ services:
       OLLAMA_BASE_URL: http://ollama:11434
       OLLAMA_LLM_MODEL: llama3.2:1b-ctx2k
       OLLAMA_EMBED_MODEL: nomic-embed-text
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+   
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
 
     volumes:
       - ./data:/app/data
