@@ -20,6 +20,7 @@ services:
       OLLAMA_NUM_CTX: 
       NVIDIA_VISIBLE_DEVICES: all
       NVIDIA_DRIVER_CAPABILITIES: compute,utility
+      OLLAMA_KEEP_ALIVE: "5m"
 
     ports:
       - "11434:11434"
@@ -118,6 +119,10 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
 
     volumes:
       - ./data:/app/data

@@ -18,7 +18,8 @@ WORKDIR /app
 # --- Python dependencies -------------------------------------------------
 COPY requirements.txt .
 RUN uv venv /opt/venv && \
-    uv pip install --python /opt/venv/bin/python --no-cache -r requirements.txt
+    uv pip install --python /opt/venv/bin/python --no-cache -r requirements.txt && \
+    uv pip install --python /opt/venv/bin/python --no-cache cython
 
 # --- Deno installation ------------------------------------------------
 RUN curl -fsSL https://deno.land/install.sh | sh && \
@@ -33,4 +34,13 @@ EXPOSE 8000
 
 # Un seul worker : les modèles Whisper sont volumineux et mis en cache par process.
 # Pour scaler horizontalement, préférez plusieurs conteneurs plutôt que --workers.
-CMD ["/opt/venv/bin/uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# uvloop + httptools accélèrent la boucle d'événements et le parsing HTTP ;
+# --limit-concurrency et --backlog augmentent le nombre de connexions simultanées
+# acceptées avant mise en file d'attente / rejet (défauts uvicorn: pas de limite
+# explicite mais un backlog socket assez bas).
+CMD ["/opt/venv/bin/uvicorn", "app.main:app", \
+     "--host", "0.0.0.0", "--port", "8000", \
+     "--loop", "uvloop", "--http", "httptools", \
+     "--limit-concurrency", "1000", \
+     "--backlog", "2048", \
+     "--timeout-keep-alive", "30"]
