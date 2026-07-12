@@ -140,6 +140,7 @@ services:
 volumes:
   whisper-cache:
   ollama-data:
+  redis-data:
 
 networks:
   rag-audio:
