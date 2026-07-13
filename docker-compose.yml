@@ -158,7 +158,7 @@ services:
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
     depends_on:
-      - drogon-backend
+      - rag-api
 
   # =========================
   # 📈 GRAFANA
