@@ -46,7 +46,7 @@ def transcribe_to_srt(
     :return: raw Whisper result (dict with "text" and "segments")
     """
     model = _get_model(model_name, device)
-    result = model.transcribe(audio_path, language=language)
+    result = model.transcribe(audio_path, language=language,fp16=False, verbose=True)
 
     srt_lines = []
     for i, segment in enumerate(result["segments"], start=1):
