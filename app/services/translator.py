@@ -50,11 +50,11 @@ def _translate_chunk(texts: list[str], target_lang: str) -> list[str]:
     joined = f" {_SEP} ".join(t.replace("\n", " ") for t in texts)
 
     prompt = (
-        f"Traduis les segments de sous-titres suivants vers la langue "
-        f"'{target_lang}'. Les segments sont séparés par le symbole {_SEP}. "
-        f"Réponds UNIQUEMENT avec les traductions, dans le même ordre, "
-        f"séparées par le même symbole {_SEP}. Ne rajoute aucun commentaire, "
-        f"aucune numérotation, aucune explication.\n\n{joined}"
+        f"Translate the following subtitle segments into '{target_lang}'. "
+        f"Segments are separated by the symbol {_SEP}. "
+        f"Respond ONLY with the translations, in the same order, "
+        f"separated by the same {_SEP} symbol. Do not add any comments, "
+        f"numbering, or explanations.\n\n{joined}"
     )
 
     resp = httpx.post(
@@ -84,7 +84,7 @@ def translate_srt_file(srt_path: str, output_path: str, target_lang: str = "en")
         blocks = parse_srt(f.read())
 
     if not blocks:
-        raise ValueError("Fichier SRT vide ou illisible")
+        raise ValueError("Empty or unreadable SRT file")
 
     for i in range(0, len(blocks), _CHUNK_SIZE):
         chunk = blocks[i : i + _CHUNK_SIZE]
