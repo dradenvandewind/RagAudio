@@ -232,6 +232,7 @@ volumes:
   whisper-cache:
   ollama-data:
   redis-data:
+  grafana-data:
 
 networks:
   rag-audio:
