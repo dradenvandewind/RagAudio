@@ -159,6 +159,26 @@ services:
       - "--config.file=/etc/prometheus/prometheus.yml"
     depends_on:
       - rag-api
+ # =========================
+  # 📊 LOKI
+  # =========================
+
+  loki:
+    image: grafana/loki:3.0.0
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+
+  promtail:
+    image: grafana/promtail:3.0.0
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ./promtail-config.yaml:/etc/promtail/config.yaml
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command: -config.file=/etc/promtail/config.yaml
+    depends_on:
+      - loki
+
 
   # =========================
   # 📈 GRAFANA
@@ -177,6 +197,7 @@ services:
       - grafana-data:/var/lib/grafana
     depends_on:
       - prometheus
+      - loki
 
   # =========================
   # 📈 Monitoring Host

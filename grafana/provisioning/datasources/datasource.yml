@@ -4,8 +4,15 @@ datasources:
   - name: Prometheus
     type: prometheus
     access: proxy
-    # Dans l'environnement Docker, on utilise le nom du service 'prometheus' 
-    # défini dans le docker-compose au lieu de 'localhost'
+
     url: http://prometheus:9090
     isDefault: true
     editable: true
+    
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    isDefault: true
+    jsonData:
+      maxLines: 1000
