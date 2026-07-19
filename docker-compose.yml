@@ -99,6 +99,10 @@ services:
   rag-api:
     build: .
     container_name: rag-llamaindex
+    labels:
+      collect_logs: "true" 
+    logging:
+      driver: "json-file"
 
     ports:
       - "${PORT:-8000}:8000"
